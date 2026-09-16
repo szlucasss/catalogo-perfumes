@@ -1,0 +1,257 @@
+<div class="min-h-screen bg-background">
+  <header class="sticky top-0 z-40 border-b bg-background/90 backdrop-blur-md">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <a href="#topo" class="group">
+        <p class="font-serif text-xl tracking-tight text-primary sm:text-2xl">{{ store.name }}</p>
+        <p class="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{{ store.tagline }}</p>
+      </a>
+
+      <nav class="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+        <a href="#catalogo" class="hover:text-foreground">Catálogo</a>
+        <a href="#sobre" class="hover:text-foreground">A maison</a>
+      </nav>
+
+      <a
+        ui-button
+        size="sm"
+        [href]="consultLink()"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Falar no WhatsApp"
+      >
+        WhatsApp
+      </a>
+    </div>
+  </header>
+
+  <section id="topo" class="relative overflow-hidden border-b">
+    <div class="absolute inset-0">
+      <img
+        src="https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?auto=format&fit=crop&w=1800&q=80"
+        alt=""
+        class="h-full w-full object-cover opacity-45"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/35"></div>
+    </div>
+
+    <div class="relative mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:items-end">
+      <div>
+        <ui-badge variant="secondary">Coleção 2026</ui-badge>
+        <h1 class="mt-4 font-serif text-4xl leading-tight text-foreground sm:text-5xl lg:text-6xl">
+          Fragrâncias para quem escolhe deixar rastro.
+        </h1>
+        <p class="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          Um catálogo curado de perfumes de nicho. Escolha a sua assinatura e finalize o pedido direto no WhatsApp.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a ui-button size="lg" href="#catalogo">Ver catálogo</a>
+          <a ui-button variant="outline" size="lg" [href]="consultLink()" target="_blank" rel="noopener noreferrer">
+            Pedir indicação
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-xl border bg-card/80 p-6 shadow-luxury backdrop-blur">
+        <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Atendimento</p>
+        <p class="mt-2 font-serif text-2xl">{{ store.city }} · WhatsApp</p>
+        <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
+          Sem carrinho. Sem cadastro. Você escolhe a fragrância e conversa com a gente para reservar.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <main id="catalogo" class="mx-auto max-w-6xl scroll-mt-24 px-4 py-12 pb-24 sm:px-6 sm:py-16">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h2 class="font-serif text-3xl">O catálogo</h2>
+        <p class="mt-2 text-sm text-muted-foreground">
+          @if (results().length === 0) {
+            Nenhuma fragrância
+          } @else if (results().length === 1) {
+            1 fragrância
+          } @else {
+            {{ results().length }} fragrâncias
+          }
+        </p>
+      </div>
+
+      <div class="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+        <div class="w-full sm:w-72">
+          <label class="sr-only" for="busca">Buscar perfume</label>
+          <input
+            id="busca"
+            ui-input
+            type="search"
+            placeholder="Buscar por nome ou nota…"
+            [ngModel]="search()"
+            (ngModelChange)="search.set($event)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar por categoria">
+      @for (item of filters; track item) {
+        <button
+          ui-button
+          type="button"
+          [variant]="filter() === item ? 'default' : 'outline'"
+          size="sm"
+          role="tab"
+          [attr.aria-selected]="filter() === item"
+          (click)="setFilter(item)"
+        >
+          {{ categoryLabel(item) }}
+        </button>
+      }
+    </div>
+
+    <ui-separator class="my-8" />
+
+    @if (results().length === 0) {
+      <div class="rounded-xl border bg-card px-6 py-16 text-center">
+        <p class="font-serif text-2xl">Nenhuma fragrância encontrada</p>
+        <p class="mt-2 text-sm text-muted-foreground">Tente outro nome, nota ou categoria.</p>
+      </div>
+    } @else {
+      <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        @for (perfume of results(); track perfume.id) {
+          <article class="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-luxury">
+            <button
+              type="button"
+              class="relative block h-48 overflow-hidden bg-muted text-left"
+              (click)="openDetails(perfume)"
+              [attr.aria-label]="'Ver detalhes de ' + perfume.name"
+            >
+              <img
+                [src]="perfume.image"
+                [alt]="perfume.name"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              />
+              @if (perfume.featured) {
+                <ui-badge class="absolute left-3 top-3 shadow-sm" variant="default">Destaque</ui-badge>
+              }
+            </button>
+
+            <div class="flex flex-1 flex-col gap-3 p-5">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="font-serif text-xl">{{ perfume.name }}</h3>
+                  <p class="mt-1 text-sm text-muted-foreground">{{ perfume.volume }} · {{ categoryLabel(perfume.category) }}</p>
+                </div>
+                <p class="text-sm font-semibold text-primary">{{ formatPrice(perfume.price) }}</p>
+              </div>
+
+              <div class="flex flex-wrap gap-1.5">
+                @for (note of perfume.notes; track note) {
+                  <ui-badge variant="outline">{{ note }}</ui-badge>
+                }
+              </div>
+
+              <div class="mt-auto flex gap-2 pt-1">
+                <button ui-button variant="outline" class="flex-1" type="button" (click)="openDetails(perfume)">
+                  Detalhes
+                </button>
+                <a ui-button class="flex-1" [href]="orderLink(perfume)" target="_blank" rel="noopener noreferrer">
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </main>
+
+  <section id="sobre" class="scroll-mt-24 border-t bg-muted/50">
+    <div class="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-2">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">A maison</p>
+        <h2 class="mt-3 font-serif text-3xl">Uma boutique, um número, uma conversa.</h2>
+        <p class="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
+          A Maison Éclat seleciona fragrâncias com personalidade — madeiras, florais e âmbares que não se perdem na multidão.
+          O pedido acontece no WhatsApp, com atendimento humano.
+        </p>
+      </div>
+      <div class="rounded-xl border bg-card p-6 shadow-sm">
+        <p class="font-serif text-2xl">Como pedir</p>
+        <ol class="mt-4 space-y-3 text-sm text-muted-foreground">
+          <li>1. Escolha a fragrância no catálogo</li>
+          <li>2. Toque em WhatsApp — a mensagem já vai preenchida</li>
+          <li>3. Confirme volume, retirada ou envio</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t">
+    <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 pb-24 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:pb-8">
+      <p>{{ store.name }} · {{ store.city }}</p>
+      <p>Catálogo exclusivo · Pedidos via WhatsApp</p>
+    </div>
+  </footer>
+</div>
+
+@if (selected(); as perfume) {
+  <div class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+    <button
+      type="button"
+      class="absolute inset-0 bg-black/50"
+      aria-label="Fechar detalhes"
+      (click)="closeDetails()"
+    ></button>
+
+    <div
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="'perfume-' + perfume.id"
+      class="relative z-10 grid max-h-[90vh] w-full max-w-2xl overflow-auto rounded-lg border bg-background shadow-luxury sm:grid-cols-2"
+    >
+      <img [src]="perfume.image" [alt]="perfume.name" class="h-64 w-full object-cover sm:h-full" />
+
+      <div class="flex flex-col gap-4 p-6">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-muted-foreground">{{ perfume.brand }}</p>
+            <h3 [id]="'perfume-' + perfume.id" class="mt-1 font-serif text-2xl">{{ perfume.name }}</h3>
+          </div>
+          <button ui-button variant="ghost" size="icon" type="button" aria-label="Fechar" (click)="closeDetails()">
+            ✕
+          </button>
+        </div>
+
+        <p class="text-sm leading-relaxed text-muted-foreground">{{ perfume.description }}</p>
+
+        <div class="flex flex-wrap gap-1.5">
+          @for (note of perfume.notes; track note) {
+            <ui-badge variant="secondary">{{ note }}</ui-badge>
+          }
+        </div>
+
+        <p class="text-sm">
+          {{ perfume.volume }} · {{ categoryLabel(perfume.category) }}
+        </p>
+        <p class="font-serif text-2xl text-primary">{{ formatPrice(perfume.price) }}</p>
+
+        <a ui-button size="lg" class="mt-auto w-full" [href]="orderLink(perfume)" target="_blank" rel="noopener noreferrer">
+          Pedir no WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+}
+
+@if (!selected()) {
+<a
+  [href]="consultLink()"
+  target="_blank"
+  rel="noopener noreferrer"
+  class="fixed bottom-5 right-5 z-40 inline-flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105"
+  aria-label="Abrir conversa no WhatsApp"
+>
+  <svg viewBox="0 0 24 24" class="size-7 fill-current" aria-hidden="true">
+    <path d="M20.5 3.5A11 11 0 0 0 2.1 17.3L1 23l5.9-1.1A11 11 0 0 0 21.5 8.4a10.9 10.9 0 0 0-1-4.9ZM12 20.3a9.2 9.2 0 0 1-4.7-1.3l-.3-.2-3.5.7.7-3.4-.2-.3a9.3 9.3 0 1 1 8 4.5Zm5.1-7c-.3-.1-1.6-.8-1.8-.9s-.4-.1-.6.1-.7.9-.8 1-.3.2-.6.1a7.6 7.6 0 0 1-2.2-1.4 8.3 8.3 0 0 1-1.5-1.9c-.2-.3 0-.4.1-.6l.4-.5.1-.3a.5.5 0 0 0 0-.5c0-.1-.6-1.4-.8-1.9s-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4 15 15 0 0 0 1.5.6 3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.6-.3Z" />
+  </svg>
+</a>
+}

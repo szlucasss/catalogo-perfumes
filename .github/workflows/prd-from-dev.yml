@@ -1,0 +1,21 @@
+name: PRD só a partir de dev
+
+on:
+  pull_request:
+    branches: [prd]
+
+jobs:
+  only-from-dev:
+    name: Origem deve ser dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recusar PR que não venha de dev
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "$HEAD_REF" != "dev" ]; then
+            echo "PRs para prd precisam partir da branch dev (origem atual: $HEAD_REF)."
+            echo "Abra o PR a partir de dev, não de uma feature."
+            exit 1
+          fi
+          echo "Origem ok: dev → prd"
