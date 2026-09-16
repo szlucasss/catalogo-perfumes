@@ -2,7 +2,7 @@ export const STORE = {
   name: 'Maison Éclat',
   tagline: 'Fragrâncias de assinatura',
   city: 'São Paulo',
-  whatsapp: '5511978512281',
+  whatsapp: '5511999999999',
   greeting: 'Olá! Vim pelo catálogo da Maison Éclat.',
 } as const;
 
